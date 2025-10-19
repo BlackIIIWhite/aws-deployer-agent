@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CloudCraft Agent</title>
+    <!-- <style>
+        /* --- Existing CSS --- */
+        body { font-family: sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; background-color: #f9f9f9; }
+        h1, h2 { color: #333; }
+        textarea, button { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        input[type="file"] { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background-color: white; } /* Style file input */
+        button { background-color: #007bff; color: white; border: none; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #aaa; cursor: not-allowed; }
+        pre { background-color: #eee; padding: 15px; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; font-size: 14px; line-height: 1.5; }
+        #logContainer { border: 1px solid #ddd; min-height: 200px; max-height: 500px; overflow-y: auto; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 24px; height: 24px; animation: spin 2s linear infinite; display: none; margin: 10px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* --- New CSS for Upload Section --- */
+        .upload-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ccc; }
+        #uploadBtn { background-color: #28a745; } /* Green upload button */
+        #uploadBtn:hover { background-color: #218838; }
+        #uploadStatus { margin-top: 10px; font-weight: bold; }
+    </style> -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>🤖 CloudCraft Agent</h1>
+
+    <h2>Chat with the Agent</h2>
+    <textarea id="promptInput" rows="3" placeholder="e.g., Deploy a new static website named my-hackathon-site."></textarea>
+    <button id="invokeBtn">Send Message</button>
+    <div id="spinner" class="spinner"></div>
+
+    <h2>Conversation Log</h2>
+    <div id="logContainer">
+        <pre id="logs">Welcome to CloudCraft Agent! Describe what you want to build.</pre>
+    </div>
+
+    <div id="uploadSection" class="upload-section" style="display: none;">
+        <h2>Upload Website Files</h2>
+        <p>Target Bucket: <strong id="targetBucketName">N/A</strong></p>
+        <input type="file" id="fileInput" multiple>
+        <button id="uploadBtn" disabled>Upload Files</button>
+        <div id="uploadSpinner" class="spinner"></div>
+        <p id="uploadStatus"></p>
+    </div>
+<script>
+    // --- Existing Variables ---
+    const promptInput = document.getElementById('promptInput');
+    const invokeBtn = document.getElementById('invokeBtn');
+    const logs = document.getElementById('logs');
+    const spinner = document.getElementById('spinner');
+    const logContainer = document.getElementById('logContainer');
+
+    // --- New Variables for Upload ---
+    const uploadSection = document.getElementById('uploadSection');
+    const targetBucketNameDisplay = document.getElementById('targetBucketName');
+    const fileInput = document.getElementById('fileInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const uploadSpinner = document.getElementById('uploadSpinner');
+    const uploadStatus = document.getElementById('uploadStatus');
+    // -----------------------------
+
+    const API_URL = 'http://127.0.0.1:5001';
+    const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    let targetBucket = null; // Variable declared ONCE at the top level
+
+    // --- Agent Invocation Logic ---
+    invokeBtn.addEventListener('click', async () => {
+        const prompt = promptInput.value;
+        if (!prompt) {
+            alert('Please enter a message for the agent.');
+            return;
+        }
+        logs.textContent += `\n\n> You: ${prompt}`;
+        spinner.style.display = 'block';
+        invokeBtn.disabled = true;
+        promptInput.value = '';
+
+        try {
+            const response = await fetch(`${API_URL}/invoke-agent`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: prompt, sessionId: sessionId })
+            });
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to get a response from the agent');
+            }
+            const data = await response.json();
+            logs.textContent += `\n\n> CloudCraft Agent: ${data.response}`;
+
+            // --- *** MODIFICATION: Extract bucket name and show upload section *** ---
+            targetBucket = null; // *** CORRECTED: Reset the existing variable, DO NOT re-declare with 'let' ***
+
+            // Prioritize patterns matching the observed agent response
+            const patterns = [
+                /The S3 bucket '([^']+)' has been created/i,
+                /bucket '([^']+)' created/i,
+                /created.*?S3 bucket.*? '([^']+)'/i,
+                /bucket name is '([^']+)'/i,
+                /bucket\s+([^'"\s]+)\s+has been created/i,
+                /successfully created.*?bucket.*?named\s+'([^']+)'/i,
+                /upload your website content to the '([^']+)' bucket/i
+            ];
+
+            console.log("Agent Response:", data.response); // Log response for debugging
+
+            for (const pattern of patterns) {
+                const bucketMatch = data.response.match(pattern);
+                if (bucketMatch && bucketMatch[1]) {
+                    targetBucket = bucketMatch[1]; // Assign to the top-level variable
+                    console.log("Bucket name found:", targetBucket);
+                    break;
+                }
+            }
+
+            if (targetBucket) {
+                targetBucketNameDisplay.textContent = targetBucket;
+                uploadSection.style.display = 'block';
+                uploadBtn.disabled = false;
+                uploadStatus.textContent = '';
+                fileInput.value = '';
+            } else {
+                 uploadSection.style.display = 'none';
+                 uploadBtn.disabled = true;
+                 console.error("Could not find bucket name in agent response.");
+            }
+            // --- *************************************************************** ---
+
+        } catch (error) {
+            logs.textContent += `\n\n> Error: ${error.message}`;
+        } finally {
+            spinner.style.display = 'none';
+            invokeBtn.disabled = false;
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+    });
+    // --- End Agent Invocation Logic ---
+
+    // --- Upload Button Logic ---
+    uploadBtn.addEventListener('click', async () => {
+        console.log("Upload button clicked. Value of targetBucket before check:", targetBucket); // Debugging log
+
+        if (!fileInput.files || fileInput.files.length === 0) {
+            alert('Please select files to upload.');
+            return;
+        }
+        // This check uses the top-level targetBucket variable
+        if (!targetBucket) {
+            alert('Target bucket name is not set. Did the agent create it successfully?');
+            console.error("Upload check failed because targetBucket is:", targetBucket); // Add detailed error log
+            return;
+        }
+
+        uploadStatus.textContent = 'Uploading files...';
+        uploadSpinner.style.display = 'block';
+        uploadBtn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('bucketName', targetBucket);
+        for (const file of fileInput.files) {
+            formData.append('files', file);
+        }
+
+        try {
+            const uploadResponse = await fetch(`${API_URL}/upload-files`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!uploadResponse.ok) {
+                 const errorData = await uploadResponse.json();
+                 throw new Error(errorData.error || `Upload failed with status ${uploadResponse.status}`);
+            }
+
+            const result = await uploadResponse.json();
+            uploadStatus.textContent = result.message;
+
+        } catch (error) {
+            uploadStatus.textContent = `Upload Error: ${error.message}`;
+        } finally {
+            uploadSpinner.style.display = 'none';
+            uploadBtn.disabled = false;
+        }
+    });
+    // --- End Upload Button Logic ---
+</script>
+</body>
+</html>

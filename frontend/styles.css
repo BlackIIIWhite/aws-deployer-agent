@@ -1,0 +1,379 @@
+/* ===== ROOT VARIABLES ===== */
+:root {
+    --primary-color: #0066ff;
+    --primary-dark: #0052cc;
+    --primary-light: #e6f2ff;
+    --secondary-color: #28a745;
+    --secondary-dark: #218838;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --error-color: #ef4444;
+    --background: #0f172a;
+    --surface: #1a2332;
+    --surface-light: #1e293b;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --border-color: #334155;
+    --border-light: #475569;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
+    --gradient-primary: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+    --gradient-secondary: linear-gradient(135deg, #28a745 0%, #218838 100%);
+}
+
+/* ===== GLOBAL STYLES ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    background: linear-gradient(135deg, var(--background) 0%, #0d1425 100%);
+    color: var(--text-primary);
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* Animated background effect */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 20% 50%, rgba(0, 102, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(40, 167, 69, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* ===== HEADINGS ===== */
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 30px;
+    letter-spacing: -1px;
+    text-shadow: 0 8px 16px rgba(0, 102, 255, 0.15);
+}
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 30px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -0.5px;
+}
+
+/* ===== TEXTAREA ===== */
+textarea {
+    width: 100%;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background-color: var(--surface);
+    color: var(--text-primary);
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+    min-height: 100px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background-color: var(--surface-light);
+    box-shadow: 0 0 0 3px var(--primary-light), var(--shadow-md);
+}
+
+textarea::placeholder {
+    color: var(--text-secondary);
+}
+
+/* ===== BUTTONS ===== */
+button {
+    width: 100%;
+    padding: 14px 20px;
+    margin-bottom: 16px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Primary Button (Invoke) */
+#invokeBtn {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+#invokeBtn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px rgba(0, 102, 255, 0.3);
+}
+
+#invokeBtn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+/* Upload Button */
+#uploadBtn {
+    background: var(--gradient-secondary);
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+#uploadBtn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px rgba(40, 167, 69, 0.3);
+}
+
+#uploadBtn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+button:disabled {
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* ===== FILE INPUT ===== */
+input[type="file"] {
+    width: 100%;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    border: 2px dashed var(--border-light);
+    border-radius: 10px;
+    background-color: var(--surface);
+    color: var(--text-secondary);
+    font-size: 14px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+input[type="file"]:hover {
+    border-color: var(--primary-color);
+    background-color: var(--surface-light);
+}
+
+input[type="file"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+/* ===== LOG CONTAINER ===== */
+#logContainer {
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    min-height: 300px;
+    max-height: 600px;
+    overflow-y: auto;
+    background-color: var(--surface);
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+    scroll-behavior: smooth;
+}
+
+#logContainer::-webkit-scrollbar {
+    width: 8px;
+}
+
+#logContainer::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#logContainer::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+#logContainer::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+#logs {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    font-family: 'Fira Code', 'Courier New', monospace;
+}
+
+/* ===== SPINNER ===== */
+.spinner {
+    border: 3px solid var(--border-color);
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    animation: spin 0.8s linear infinite;
+    display: none;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===== UPLOAD SECTION ===== */
+.upload-section {
+    margin-top: 40px;
+    padding: 24px;
+    border-top: 2px solid var(--border-color);
+    background: linear-gradient(135deg, var(--surface-light) 0%, var(--surface) 100%);
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.upload-section p {
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.upload-section strong {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+#targetBucketName {
+    background: var(--primary-light);
+    color: var(--primary-color);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+}
+
+/* ===== STATUS MESSAGES ===== */
+#uploadStatus {
+    margin-top: 14px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--success-color);
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+#uploadStatus.error {
+    color: var(--error-color);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    body {
+        padding: 20px 15px;
+    }
+
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 24px;
+    }
+
+    h2 {
+        font-size: 1.25rem;
+        margin-top: 24px;
+        margin-bottom: 14px;
+    }
+
+    textarea,
+    button,
+    input[type="file"] {
+        font-size: 16px;
+        padding: 12px 14px;
+    }
+
+    #logContainer {
+        min-height: 250px;
+        max-height: 400px;
+        padding: 16px;
+    }
+
+    #logs {
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .upload-section {
+        padding: 18px;
+        margin-top: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.75rem;
+        margin-bottom: 20px;
+    }
+
+    h2 {
+        font-size: 1.1rem;
+        margin-top: 20px;
+    }
+
+    textarea {
+        min-height: 80px;
+        padding: 12px;
+    }
+
+    #logContainer {
+        min-height: 200px;
+        max-height: 350px;
+    }
+}

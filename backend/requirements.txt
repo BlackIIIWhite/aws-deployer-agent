@@ -1,0 +1,7 @@
+langchain
+langchain-google-genai  # Changed from langchain-openai
+boto3
+flask
+flask-cors
+pyyaml
+python-dotenv
